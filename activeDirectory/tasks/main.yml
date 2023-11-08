@@ -1,10 +1,28 @@
 ---
 # tasks file for activeDirectory
 
-- name: set the default shell to PowerShell
-  win_regedit:
-    path: HKLM:\SOFTWARE\OpenSSH
-    name: DefaultShell
-    data: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
-    type: string
-    state: present
+- name: Install AD
+  ansible.windows.win_powershell:
+    script: |
+      Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
+
+- name: Check if ADDS Forest is Created
+  ansible.windows.win_powershell:
+    script: |
+      Get-ADDomainController | Where IPv4Address -Match {{ ansible_host }}
+  register: addomaincontroller
+
+- name: Create ADDS Forest
+  ansible.windows.win_powershell:
+    script: |
+      Import-Module ADDSDeployment
+      Install-ADDSForest -CreateDnsDelegation:$false  -DatabasePath {{ paths.database }}  -DomainMode "WinThreshold"  -DomainName {{ domain }}   -DomainNetbiosName {{ netbios }} -ForestMode "WinThreshold" -InstallDns:$true -LogPath {{ paths.log }} -NoRebootOnCompletion:$true -SysvolPath {{ paths.sysvol }} -SafeModeAdministratorPassword (ConvertTo-SecureString -String {{ administrator_password }} -AsPlainText -Force)  -Force:$true
+  when: not addomaincontroller.output
+
+- name: Ensure each account is created
+  win_domain_user:
+    name: '{{ item.key }}'
+    upn: '{{ item.key }}@{{ domain }}'
+    password: '{{ item.value.password }}'
+    password_never_expires: '{{ item.value.neverExpires }}'
+  with_dict: "{{ users }}"

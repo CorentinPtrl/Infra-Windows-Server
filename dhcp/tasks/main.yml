@@ -5,36 +5,32 @@
   ansible.windows.win_powershell:
     script: |
       Install-WindowsFeature DHCP -IncludeManagementTools
-      Add-DhcpServerInDC -DnsName srv-win202201.contoso.adds -IPAddress 192.168.5.11
+      Add-DhcpServerInDC -DnsName {{ dhcp_server.dns_name }} -IPAddress {{ dhcp_server.address }}
 
 - name: Check if DHCP LAN Scope Exist
   ansible.windows.win_powershell:
     script: |
-      Get-DHCPServerv4Scope -ComputerName 192.168.5.11 | where ScopeId -Match 192.168.5.0
+      Get-DHCPServerv4Scope -ComputerName {{ dhcp_server.address }} | where ScopeId -Match {{ dhcp_scope.scope_id  }}
   register: DHCPScope
 
 - name: Create DHCP Scope
   ansible.windows.win_powershell:
     script: |
-      Add-DhcpServerv4Scope -Name "LAN" -StartRange 192.168.5.20 -EndRange 192.168.5.100 -SubnetMask 255.255.255.0 -Description "Reseau Interne"  -State Active
+      Add-DhcpServerv4Scope -Name "LAN" -StartRange {{ dhcp_scope.start_range  }} -EndRange {{ dhcp_scope.end_range }} -SubnetMask {{ dhcp_scope.subnet_mask }} -Description "Reseau Interne"  -State Active
   when: not DHCPScope.output
 
 - name: Set OptionalValues and ScopeId
   ansible.windows.win_powershell:
     script: |
-       Set-DhcpServerv4Scope -Name "LAN" -ScopeId 192.168.5.
-       Set-DhcpServerv4OptionValue -ScopeId 192.168.5.0 -DnsServer 192.168.5.11 -Router 192.168.5.1
+       Set-DhcpServerv4Scope -Name "LAN" -ScopeId {{ dhcp_scope.scope_id  }}
+       Set-DhcpServerv4OptionValue -ScopeId {{ dhcp_scope.scope_id  }} -DnsServer {{ dhcp_server.dns_address }} -Router {{ dhcp_scope.gateway }}
 
-- name: Ensure DHCP reservation exists
-  community.windows.win_dhcp_lease:
-    type: reservation
-    ip: 192.168.5.102
-    scope_id: 192.168.5.0
-    mac: 00:B1:8A:D1:5A:1F
-    dns_hostname: "test.contoso.adds"
-    description: Testing Server
-
-- name: Convert DHCP reservation to lease
+- name: Create DHCP leases
   community.windows.win_dhcp_lease:
     type: lease
-    ip: 192.168.5.102
+    ip: "{{item.value.ip}}"
+    scope_id: "{{item.value.scope_id}}"
+    mac: "{{item.value.mac}}"
+    dns_hostname: "{{item.value.dns_hostname}}"
+    dns_hostname: "{{item.value.description}}"
+  with_dict: "{{dhcp_leases}}"

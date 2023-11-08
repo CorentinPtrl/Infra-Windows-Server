@@ -19,6 +19,11 @@
       Install-ADDSForest -CreateDnsDelegation:$false  -DatabasePath {{ paths.database }}  -DomainMode "WinThreshold"  -DomainName {{ domain }}   -DomainNetbiosName {{ netbios }} -ForestMode "WinThreshold" -InstallDns:$true -LogPath {{ paths.log }} -NoRebootOnCompletion:$true -SysvolPath {{ paths.sysvol }} -SafeModeAdministratorPassword (ConvertTo-SecureString -String {{ administrator_password }} -AsPlainText -Force)  -Force:$true
   when: not addomaincontroller.output
 
+
+- name: Reboot when ADDS requires-it
+  ansible.windows.win_reboot:
+  when: not addomaincontroller.output
+
 - name: Ensure each account is created
   win_domain_user:
     name: '{{ item.key }}'

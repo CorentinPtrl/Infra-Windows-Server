@@ -6,24 +6,30 @@
     script: |
       Install-WindowsFeature DHCP -IncludeManagementTools
       Add-DhcpServerInDC -DnsName {{ dhcp_server.dns_name }} -IPAddress {{ dhcp_server.address }}
+  register: tmp
+  changed_when: '"NoChangeNeeded" in tmp.output[0].ExitCode'
 
 - name: Check if DHCP LAN Scope Exist
   ansible.windows.win_powershell:
     script: |
       Get-DHCPServerv4Scope -ComputerName {{ dhcp_server.address }} | where ScopeId -Match {{ dhcp_scope.scope_id  }}
-  register: DHCPScope
+  register: dhcpscope_status
 
 - name: Create DHCP Scope
   ansible.windows.win_powershell:
     script: |
       Add-DhcpServerv4Scope -Name "LAN" -StartRange {{ dhcp_scope.start_range  }} -EndRange {{ dhcp_scope.end_range }} -SubnetMask {{ dhcp_scope.subnet_mask }} -Description "Reseau Interne"  -State Active
-  when: not DHCPScope.output
+  when: not dhcpscope_status.output
+  register: tmp
+  changed_when: '"ResourceExists" in tmp.error'
 
 - name: Set OptionalValues and ScopeId
   ansible.windows.win_powershell:
     script: |
        Set-DhcpServerv4Scope -Name "LAN" -ScopeId {{ dhcp_scope.scope_id  }}
        Set-DhcpServerv4OptionValue -ScopeId {{ dhcp_scope.scope_id  }} -DnsServer {{ dhcp_server.dns_address }} -Router {{ dhcp_scope.gateway }}
+  register: tmp
+  failed_when: tmp.error | length > 0
 
 - name: Create DHCP leases
   community.windows.win_dhcp_lease:

@@ -1,0 +1,43 @@
+{
+"builders": [{
+    "name": "Debian-12.2",
+    "type": "vmware-iso",
+    "vm_name": "Debian-12.2",
+    "guest_os_type": "debian10-64",
+    "tools_upload_flavor": "linux",
+    "headless": true,
+
+    "iso_urls": ["iso/debian-12.2.0-amd64-netinst.iso",
+      "https://chuangtzu.ftp.acc.umu.se/debian-cd/current/amd64/iso-cd/debian-12.2.0-amd64-netinst.iso"
+    ],
+    "iso_checksum": "sha256:23ab444503069d9ef681e3028016250289a33cc7bab079259b73100daee0af66",
+
+    "cpus": 2,
+    "memory": 4096,
+    "disk_size": 20140,
+
+    "boot_wait": "2s",
+    "boot_command": [
+	"<esc><wait>auto preseed/url=https://raw.githubusercontent.com/eaksel/packer-Debian10/master/http/preseed.cfg<enter>"
+      ],
+
+    "ssh_username": "packer",
+    "ssh_password": "packer",
+    "ssh_port": 22,
+    "ssh_wait_timeout": "20m",
+    "shutdown_command": "echo 'shutdown -P now' > shutdown.sh; echo 'vargant'|sudo -S sh 'shutdown.sh'",
+
+    "vnc_over_websocket": true,
+    "format": "vmx",
+    "remote_type": "esx5",
+    "remote_host": "{{user `esxi_host`}}",
+    "remote_datastore": "{{user `esxi_datastore`}}",
+    "remote_username": "{{user `esxi_username`}}",
+    "remote_password": "{{user `esxi_password`}}",
+    "keep_registered": true,
+    "skip_export": true,
+    "vmx_data": {
+      "ethernet0.networkName": "PfSense_LAN"
+    }
+  }]
+}

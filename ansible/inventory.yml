@@ -1,0 +1,8 @@
+[winhost]
+SRV-WIN202201 ansible_host=192.168.5.11
+
+[winhost:vars]
+ansible_user = administrator@contoso.adds
+ansible_password = Passw0rd
+ansible_connection = ssh
+ansible_shell_type=powershell

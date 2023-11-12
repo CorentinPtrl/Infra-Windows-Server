@@ -112,15 +112,6 @@
             <!-- https://docs.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/microsoft-windows-security-spp-ux -->
             <SkipAutoActivation>true</SkipAutoActivation>
         </component>
-        <component name="Microsoft-Windows-Deployment" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-            <RunSynchronous>
-                <RunSynchronousCommand wcm:action="add">
-                    <Description>Install VMware Tools</Description>
-                    <Order>1</Order>
-                    <Path>%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe -File F:\install-vmware-tools-from-iso.ps1</Path>
-                </RunSynchronousCommand>
-            </RunSynchronous>
-        </component>
     </settings>
     <settings pass="oobeSystem">
         <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -141,6 +132,16 @@
                 <Username>Administrator</Username>
             </AutoLogon>
             <FirstLogonCommands>
+                <SynchronousCommand wcm:action="add">
+                    <CommandLine>cmd.exe /c C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -File a:\install_vmware_tools.ps1</CommandLine>
+                    <Description>Enable WinRM</Description>
+                    <Order>1</Order>
+                </SynchronousCommand>
+                <SynchronousCommand wcm:action="add">
+                    <CommandLine>cmd.exe /c C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -File a:\enable-winrm.ps1</CommandLine>
+                    <Description>Enable WinRM</Description>
+                    <Order>99</Order>
+                </SynchronousCommand> 
             </FirstLogonCommands>
             <OOBE>
                 <HideEULAPage>true</HideEULAPage>

@@ -27,3 +27,8 @@ wsus_computer_target_group_list:
   - TysCo
 
 wsus_chocolatey_source: "http://chocolatey.org/api/v2"
+
+GPO:
+  policy: PC
+  wsus_server: 192.168.5.16
+  target: TysCo

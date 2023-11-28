@@ -1,0 +1,40 @@
+---
+
+- name: Create GPO
+  ansible.windows.win_powershell:
+    script: |
+      New-GPO -Name {{ GPO.policy }}
+
+#- name: Link GPO to OU
+#  ansible.windows.win_powershell:
+#    script: |
+#      New-GPLink -Name  {{ GPO.policy }} -Target {{ GPO.target }}
+
+- name: Use WSUS
+  ansible.windows.win_powershell:
+    script: |
+      $key = 'HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU'
+      Set-GPRegistryValue -Name {{ GPO.policy }} `
+      -Key $key `
+      -ValueName 'UseWUServer' `
+      -Type DWORD -Value 1
+
+- name: Automatically Download Updates
+  ansible.windows.win_powershell:
+    script: |
+      $key = 'HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU'
+      Set-GPRegistryValue -Name {{ GPO.policy }} `
+      -Key $key `
+      -ValueName 'AUOptions' `
+      -Type DWORD `
+      -Value 2
+
+- name: Set WSUS server as source
+  ansible.windows.win_powershell:
+    script: |
+      $key = 'HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate'
+      Set-GPRegistryValue -Name {{ GPO.policy }} `
+      -Key $key `
+      -ValueName 'WUServer' `
+      -Type String `
+      -Value http://{{ GPO.wsus_server }}

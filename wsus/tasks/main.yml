@@ -1,16 +1,24 @@
 ---
 - name: Check Variables
   import_tasks: validate.yml
+  when: not GPO_master|bool
 
 - name: Install WSUS Binaries
   import_tasks: install.yml
+  when: not GPO_master|bool
 
 - name: Configure WSUS Server
   import_tasks: configure.yml
+  when: not GPO_master|bool
 
 - name: Configure Auto Close
   import_tasks: close.yml
+  when: not GPO_master|bool
 
 #- name: Pull updates
 #  import_tasks: syncronize.yml
+#  when: not GPO_master|bool
 
+- name: Configure GPO
+  import_tasks: gpo.yml
+  when: GPO_master|bool

@@ -24,12 +24,12 @@ variable "esxi_username" {
 }
 
 source "vmware-iso" "WindowsServer-2022-Datacenter" {
-  floppy_files        = ["config/autounattend.xml", "scripts/ssh_server.ps1", "scripts/enable-winrm.ps1", "scripts/install_vmware_tools.ps1"]
+  floppy_files        = ["config/autounattend.xml", "scripts/ssh_server.ps1", "scripts/enable-winrm.ps1"]
   communicator        = "winrm"
   cpus                = 2
   disk_adapter_type = "lsisas1068"
   disk_size           = 80560
-  format              = "vmx"
+  format              = "ova"
   guest_os_type       = "windows2019srvNext-64"
   headless            = true
   iso_checksum        = "sha256:3e4fa6d8507b554856fc9ca6079cc402df11a8b79344871669f0251535255325"
@@ -42,7 +42,7 @@ source "vmware-iso" "WindowsServer-2022-Datacenter" {
   remote_type         = "esx5"
   remote_username     = "${var.esxi_username}"
   shutdown_command = "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\""
-  skip_export         = true
+  skip_export         = false
   tools_upload_flavor = "windows"
   winrm_password   = "Passw0rd"
   winrm_timeout    = "20m"

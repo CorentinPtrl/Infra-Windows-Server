@@ -7,4 +7,6 @@
                  start-page="Default-topic.md">
 
     <toc-element topic="Default-topic.md"/>
+    <toc-element topic="WindowsServer_basic.md"/>
+    <toc-element topic="WindowsServer_avance.md"/>
 </instance-profile>

@@ -1,0 +1,16 @@
+<buildprofiles xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/build-profiles.xsd"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <variables>
+
+    </variables>
+    <build-profile instance="instance_id"/>
+    <footer>
+
+        <copyright>Entys_Draw and Corentin 2023-2024</copyright>
+        <social type="linkedin" href="https://www.linkedin.com/in/enzo-ferrari-1b6434228/"/>
+        <social type="twitter" href="https://twitter.com/Enzo_Kuro_Neko"/>
+        <link href="https://github.com/Entys">GitHub-Entys</link>
+        <link href="https://github.com/CorentinPtrl">GitHub-Corentin</link>
+
+    </footer>
+</buildprofiles>

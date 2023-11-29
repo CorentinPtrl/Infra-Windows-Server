@@ -5,6 +5,7 @@
 - [Introduction](#introduction)
 - [Installation de Windows Server basique](#1-installation-de-windows-server-basique)
 - [Installation de Windows Server avancée](#2-installation-de-windows-server-avancee)
+- [Credits](#3-credits)
 
 ### Introduction
 
@@ -19,3 +20,5 @@
 
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
 <a href="WindowsServer_avance.md">En savoir plus</a>
+
+## 3. Credits

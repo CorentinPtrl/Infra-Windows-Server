@@ -9,31 +9,40 @@
 - name: Create servers array
   set_fact:
     servers: "{{ [ primaryServer ] + slavesServer }}"
+  when: DFS_master|bool
 
 - name: Create Replication Group
   ansible.windows.win_powershell:
     script: |
-      New-DfsReplicationGroup -GroupName "{{ groupName }}" | New-DfsReplicatedFolder -FolderName {{ folderName }} | Add-DfsrMember -ComputerName {{ '\"' + servers | join('\",\"') + '\"' }}
+      New-DfsReplicationGroup -GroupName "{{ groupName }}" | New-DfsReplicatedFolder -GroupName "{{ groupName }}" -FolderName "{{ folderName }}" | Add-DfsrMember  -GroupName "{{ groupName }}"  -ComputerName {{ servers | join(',') }}
+  when: DFS_master|bool
 
 - name: Create DSFR Connections
   ansible.windows.win_powershell:
     script: |
-      Add-DfsrConnection -GroupName "{{ groupName }}" -SourceComputerName {{ primaryServer }} -DestinationComputerName "srv-win202202" | Format-Table *name -wrap -autosize
+      Add-DfsrConnection -GroupName "{{ groupName }}" -SourceComputerName {{ primaryServer }} -DestinationComputerName {{ slavesServer | join(',') }} | Format-Table *name -wrap -autosize
   register: dfs_connection
   failed_when: dfs_connection.error | length > 0
+  when: DFS_master|bool
+
+- name: Create DSFR Folder
+  ansible.windows.win_powershell:
+    script: |
+      mkdir -p "{{ contentPath }}"
 
 - name: Create DSFR Primary Connection
   ansible.windows.win_powershell:
     script: |
-      Set-DfsrMembership -GroupName "{{ groupName }}" -FolderName {{ folderName }} -ContentPath {{ contentPath }} -ComputerName {{ primaryServer }} -PrimaryMember $True -StagingPathQuotaInMB 16384 -Force | Format-Table *name,*path,primary* -autosize -wrap
+      Set-DfsrMembership -GroupName "{{ groupName }}" -FolderName "{{ folderName }}" -ContentPath {{ contentPath }} -ComputerName "{{ primaryServer }}" -PrimaryMember $True -StagingPathQuotaInMB 16384 -Force | Format-Table *name,*path,primary* -autosize -wrap
   register: dfs_primary
   failed_when: dfs_primary.error | length > 0
+  when: DFS_master|bool
 
 - name: Create DSFR Slaves Connection
   ansible.windows.win_powershell:
     script: |
-      Set-DfsrMembership -GroupName "{{ groupName }}" -FolderName {{ folderName }} -ContentPath {{ folderName }} -ComputerName {{ item }} -StagingPathQuotaInMB 16384 autosize -wrap -WhatIf
+      Set-DfsrMembership -GroupName "{{ groupName }}" -FolderName "{{ folderName }}" -ContentPath {{ contentPath }} -ComputerName {{ item }} -StagingPathQuotaInMB 16384 -Force | Format-Table *name,*path,primary* -auto -wrap
   with_items: "{{ slavesServer }}"
   register: dfs_slave
   failed_when: dfs_slave.error | length > 0
-
+  when: DFS_master|bool

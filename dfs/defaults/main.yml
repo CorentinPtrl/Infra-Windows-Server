@@ -2,7 +2,7 @@
 # defaults file for dfs
 groupName: "Branch Office 1"
 folderName: "Data Distribution 1"
-contentPath : "C:/Rf01"
-primaryServer: "srv-win202201"
+contentPath: "C:\\Rf01"
+primaryServer: "SRV-WIN202201"
 slavesServer:
-  -  "srv-win202202"
+  -  "SRV-WIN202202"

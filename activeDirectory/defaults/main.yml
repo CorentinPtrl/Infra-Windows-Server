@@ -4,8 +4,8 @@ paths:
   database: "C:/ADDS/NTDS"
   sysvol: "C:/ADDS/SYSVOL"
   log: "C:/ADDS/NTDS"
-domain: "tysco.adds"
-netbios: "TYSCO"
+domain: "contoso.adds"
+netbios: "CONTOSO"
 administrator_password: "Passw0rd"
 
 users:

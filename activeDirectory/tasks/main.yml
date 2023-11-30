@@ -5,24 +5,25 @@
   ansible.windows.win_powershell:
     script: |
       Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
+  when: GPO_master|bool
 
 - name: Check if ADDS Forest is Created
   ansible.windows.win_powershell:
     script: |
       Get-ADDomainController | Where IPv4Address -Match {{ ansible_host }}
   register: addomaincontroller
+  when: GPO_master|bool
 
 - name: Create ADDS Forest
   ansible.windows.win_powershell:
     script: |
       Import-Module ADDSDeployment
       Install-ADDSForest -CreateDnsDelegation:$false  -DatabasePath {{ paths.database }}  -DomainMode "WinThreshold"  -DomainName {{ domain }}   -DomainNetbiosName {{ netbios }} -ForestMode "WinThreshold" -InstallDns:$true -LogPath {{ paths.log }} -NoRebootOnCompletion:$true -SysvolPath {{ paths.sysvol }} -SafeModeAdministratorPassword (ConvertTo-SecureString -String {{ administrator_password }} -AsPlainText -Force)  -Force:$true
-  when: not addomaincontroller.output
-
+  when: GPO_master|bool
 
 - name: Reboot when ADDS requires-it
   ansible.windows.win_reboot:
-  when: not addomaincontroller.output
+  when: GPO_master|bool
 
 - name: Ensure each account is created
   win_domain_user:
@@ -31,3 +32,17 @@
     password: '{{ item.value.password }}'
     password_never_expires: '{{ item.value.neverExpires }}'
   with_dict: "{{ users }}"
+  when: GPO_master|bool
+
+- name: Domain Membership
+  ansible.windows.win_domain_membership:
+    dns_domain_name: contoso.adds
+    hostname: SRV-WIN202202
+    domain_admin_user: 'Administrator@{{ domain }}'
+    domain_admin_password: Passw0rd
+    state: domain
+  register: domain_state
+  when: not GPO_master|bool
+- name: Reboot after Joining domain
+  ansible.windows.win_reboot:
+

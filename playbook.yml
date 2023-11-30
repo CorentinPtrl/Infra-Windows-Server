@@ -2,4 +2,10 @@
 - hosts: all
   gather_facts: true
   roles:
-    - role: dhcp
+    - role: activeDirectory
+    - role: dfs
+    - role: wsus
+- name: Install DHCP
+  hosts: all
+  roles:
+    - { role: dhcp, when: DHCP_master|bool }
